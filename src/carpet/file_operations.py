@@ -44,7 +44,7 @@ def makeZipArchive(folder: str, outputFile: str):
 def write_json(d: dict, outfile: str, indent: int = 4):
     with open(outfile, "w") as outfile:
         json.dump(d, outfile, indent=indent)
-def append_json(d: dict, outfile: str, indent: int = 4):
+def append_json(outfile: str, d: dict, indent: int = 4):
     with open(outfile, "r") as file:
         data = json.load(file)
     data.update(d)
