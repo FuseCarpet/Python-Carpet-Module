@@ -16,6 +16,7 @@ import base64
 import carpet.file_operations as fo
 import tkinter as tk
 import easygui
+import urllib.request
 
 class gui:
     def __tkExitOnClose__(widget: tk.Tk):
@@ -32,7 +33,7 @@ class gui:
         t.geometry(f"{round(900+len(terms))}x{round(600+len(terms)/10)}")
         t.title(title)
 
-        gui.__ExitOnClose__(t)
+        gui.__tkExitOnClose__(t)
 
         __tLabel__ = tk.Label(t, text=terms)
         __tLabel__.pack()
@@ -45,10 +46,38 @@ class gui:
         __disagree__.pack()
 
         t.mainloop()
+    
+    def MessageBox_1(title="", text="", btn_text="OK", wl=600, wh=400, ExitOnClose=False, HAS_OK_BUTTON=True):
+        t = tk.Tk()
+        t.geometry(f"{round(wl+len(text))}x{round(wh+len(text)/10)}")
+        t.title(title)
 
-def percent_of(num_a, num_b):
+        if ExitOnClose:
+            gui.__tkExitOnClose__(t)
+
+        __tLabel__ = tk.Label(t, text=text)
+        __tLabel__.pack()
+
+        if not ExitOnClose:
+            __ok__ = tk.Button(t, text=btn_text, command=t.destroy)
+        else:
+            __ok__ = tk.Button(t, text=btn_text, command=lambda:sys.exit(0))
+
+        if HAS_OK_BUTTON:
+            __ok__.pack()
+        tk.Label(t, text="").pack()
+
+        t.mainloop()
+    
+    def CheckInternetBox_1(ExitOnClose=True):
+        if has_internet():
+            return True
+        gui.MessageBox_1("No Internet", "Please connect to the internet.", ExitOnClose=ExitOnClose)
+        return False
+
+def percent_of(num_a, total):
     try:
-        return (num_a / num_b) * 100
+        return (num_a / total) * 100
     except ZeroDivisionError:
         return 0
 
@@ -64,6 +93,13 @@ class hash:
 
 class text_encodings:
     utf8 = "UTF-8"
+
+def has_internet(host='http://fast.com'):
+    try:
+        urllib.request.urlopen(host)
+        return True
+    except:
+        return False
 
 def Inputs(inputs = []):
     vals = []
@@ -219,7 +255,10 @@ def c_arr(s: str):
 def splitspaces(s: str):
     return s.split(" ")
 
-def createWebWindow(title: str, URL: str, w: int = 1000, h: int = 800):
+def createWebWindow(title: str, URL: str, w: int = 1000, h: int = 800, CheckInternet=False):
+    if CheckInternet:
+        if not gui.CheckInternetBox_1(False):
+            return
     webview.create_window(title, URL, width=w, height=h)
     webview.start()
 
@@ -268,9 +307,9 @@ class Settings():
             fo.write(self.file, '{}')
     
     def set(self, data_name, data_value):
-        fo.append_json({data_name: data_value}, self.file)
+        fo.append_json(self.file, {data_name: data_value})
     def d_set(self, d: dict):
-        fo.append_json(d, self.file)
+        fo.append_json(self.file, d)
     
     def read(self):
         return fo.read_json(self.file)
